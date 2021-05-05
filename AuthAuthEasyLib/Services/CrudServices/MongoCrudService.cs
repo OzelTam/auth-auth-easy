@@ -15,9 +15,25 @@ namespace AuthAuthEasyLib.Services
 
         public MongoCrudService(MongoCrudServiceConfig config)
         {
-            mongoClient = new MongoClient(config.ConnectionString);
+            switch (config.ConfigType)
+            {
+                case MongoCrudServiceConfig.SetMethod.ConnectionString:
+                    mongoClient = new MongoClient(config.ConnectionString);
+                    break;
+
+                case MongoCrudServiceConfig.SetMethod.ClientSettings:
+                    mongoClient = new MongoClient(config.MongoSettings);
+                    break;
+
+                case MongoCrudServiceConfig.SetMethod.Local:
+                    mongoClient = new MongoClient();
+                    break;
+            }
+
+
             database = mongoClient.GetDatabase(config.DatabaseName);
             collection = database.GetCollection<T>(config.CollectionName);
+
         }
 
 
@@ -86,6 +102,7 @@ namespace AuthAuthEasyLib.Services
         {
             return (await collection.DeleteManyAsync(expression)).DeletedCount;
         }
+
 
     }
 }

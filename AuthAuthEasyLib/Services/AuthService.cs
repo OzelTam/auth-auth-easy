@@ -25,9 +25,6 @@ namespace AuthAuthEasyLib.Services
             InitializeSubServices();
         }
 
-
-        // TODO: Create constructor with FirebaseCrudConfig
-
         public AuthService(MongoCrudServiceConfig serviceConfig)
         {
             this.crudService = new MongoCrudService<T>(serviceConfig);
@@ -45,7 +42,6 @@ namespace AuthAuthEasyLib.Services
         }
 
         #region Root Register Methods
-        // TODO: CREATE EMAIL VERIFICATION SERVİCE
         public async Task RegisterAsync(T newUser, RegisterOptions options = null)
         {
             TimeSpan span = new TimeSpan(7, 0, 0, 0, 0);
@@ -113,7 +109,7 @@ namespace AuthAuthEasyLib.Services
                 throw new UnauthorizedAccessException("Wrong password.");
             }
         }
-        public (IAuthUser, Token) Login(Expression<Func<T, bool>> expression, string password)
+        public (T, Token) Login(Expression<Func<T, bool>> expression, string password)
         {
             var userFound = crudService.Find(expression).FirstOrDefault();
             if (userFound == null)
@@ -334,7 +330,11 @@ namespace AuthAuthEasyLib.Services
 
         public async Task ChangePasswordAsync(string userId, string oldPassword, string newPassword)
         {
-            var user = (await crudService.FindAsync(u => u._Id == userId)).FirstOrDefault();
+            await ChangePasswordAsync(user => user._Id == userId, oldPassword, newPassword);
+        }
+        public async Task ChangePasswordAsync(Expression<Func<T, bool>> expression, string oldPassword, string newPassword)
+        {
+            var user = (await crudService.FindAsync(expression)).FirstOrDefault();
             if (user == null)
                 throw new Exception("User Not found.");
 
@@ -343,11 +343,15 @@ namespace AuthAuthEasyLib.Services
 
             user.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(newPassword);
             crudService.Replace(user);
-          
         }
+       
         public void ChangePassword(string userId, string oldPassword, string newPassword)
         {
-            var user = crudService.Find(u => u._Id == userId).FirstOrDefault();
+            ChangePassword(user => user._Id == userId, oldPassword, newPassword);
+        }
+        public void ChangePassword(Expression<Func<T,bool>> expression, string oldPassword, string newPassword)
+        {
+            var user = crudService.Find(expression).FirstOrDefault();
             if (user == null)
                 throw new Exception("User Not found.");
 
@@ -357,8 +361,8 @@ namespace AuthAuthEasyLib.Services
             user.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(newPassword);
             crudService.Replace(user);
         }
-
-
+       
+        
         public async Task ResetPasswordAsync(string tokenKey, string newPassword)
         {
             var user = await tokenManager.GetUserWithTokenKeyAsync(tokenKey, 3);
