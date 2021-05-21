@@ -252,42 +252,119 @@ namespace AuthAuthEasyLib.Services
         }
         #endregion
 
+
+        #region CheckRole
+        private bool CheckRole(T user, string role, bool caseInsensetive = false)
+        {
+            if (!caseInsensetive)
+                return user.Roles.Any(rol => rol == role);
+            else
+                return user.Roles.Any(rol => rol.ToLower() == role.ToLower());
+        }
+        private bool CheckRole(T user, string[] roles, bool caseInsensetive = false)
+        {
+            foreach (var role in roles)
+            {
+                if (!CheckRole(user, role, caseInsensetive))
+                    return false;
+            }
+            return true;
+        } 
+        #endregion
+
         #region IsAuthorized Methods
-        public async Task<(bool, Exception)> IsAuthorizedAsync(string tokenKey)
+        public async Task<(bool, Exception, T)> IsAuthorizedAsync(string tokenKey)
         {
             var user = await tokenManager.GetUserWithTokenKeyAsync(tokenKey, 1);
 
 
             var userToken = user.Tokens.Where(t => t.Key == tokenKey).FirstOrDefault();
             if (userToken == null)
-                return (false, new UnauthorizedAccessException("Invalid token key."));
+                return (false, new UnauthorizedAccessException("Invalid token key."), user);
 
             if (DateTime.Compare(userToken.Expiration, DateTime.Now) < 0)
             {
                 await tokenManager.ClearExpiredTokensAsync(user);
-                return (false, new UnauthorizedAccessException("Token has been expired."));
+                return (false, new UnauthorizedAccessException("Token has been expired."), user);
             }
 
-            return (true, null);
+            return (true, null, user);
 
         }
-        public (bool, Exception) IsAuthorized(string tokenKey)
+        public async Task<(bool, Exception, T)> IsAuthorizedAsync(string tokenKey, string requiredRole, bool caseInsensetive = false)
+        {
+            var (isValid, except, user) = await IsAuthorizedAsync(tokenKey);
+            if (!isValid)
+                return (false, except, user);
+            else
+            {
+                if (CheckRole(user, requiredRole, caseInsensetive))
+                    return (true, except, user);
+                else
+                    return (false, new UnauthorizedAccessException("Unauthorized access."), user);
+            }
+            
+        }
+        public async Task<(bool, Exception, T)> IsAuthorizedAsync(string tokenKey, string[] requiredRoles, bool caseInsensetive = false)
+        {
+            var (isValid, except, user) = await IsAuthorizedAsync(tokenKey);
+            if (!isValid)
+                return (false, except, user);
+            else
+            {
+                if (CheckRole(user, requiredRoles, caseInsensetive))
+                    return (true, except, user);
+                else
+                    return (false, new UnauthorizedAccessException("Unauthorized access."), user);
+            }
+
+        }
+
+        public (bool, Exception, T) IsAuthorized(string tokenKey)
         {
             var user = tokenManager.GetUserWithTokenKey(tokenKey, 1);
 
             var userToken = user.Tokens.Where(t => t.Key == tokenKey).FirstOrDefault();
             if (userToken == null)
-                return (false, new UnauthorizedAccessException("Invalid token key."));
+                return (false, new UnauthorizedAccessException("Invalid token key."),user);
 
             if (DateTime.Compare(userToken.Expiration, DateTime.Now) < 0)
             {
                 tokenManager.ClearExpiredTokens(user);
-                return (false, new UnauthorizedAccessException("Token has been expired."));
+                return (false, new UnauthorizedAccessException("Token has been expired."),user);
             }
 
-            return (true, null);
+            return (true, null,user);
 
         }
+        public (bool, Exception, T) IsAuthorized(string tokenKey, string requiredRole, bool caseInsensetive = false)
+        {
+            var (isValid, except, user) =  IsAuthorized(tokenKey);
+            if (!isValid)
+                return (false, except, user);
+            else
+            {
+                if (CheckRole(user, requiredRole, caseInsensetive))
+                    return (true, except, user);
+                else
+                    return (false, new UnauthorizedAccessException("Unauthorized access."), user);
+            }
+        }
+        public (bool, Exception, T) IsAuthorized(string tokenKey, string[] requiredRoles, bool caseInsensetive = false)
+        {
+            var (isValid, except, user) = IsAuthorized(tokenKey);
+            if (!isValid)
+                return (false, except, user);
+            else
+            {
+                if (CheckRole(user, requiredRoles, caseInsensetive))
+                    return (true, except, user);
+                else
+                    return (false, new UnauthorizedAccessException("Unauthorized access."), user);
+            }
+        }
+
+
         #endregion
 
         #region User Update Info Methods
