@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
@@ -17,6 +18,8 @@ namespace AuthAuthEasyLib.Interfaces
         Task<T> DeleteOneAsync(Expression<Func<T, bool>> expression);
         IEnumerable<T> Find(Expression<Func<T, bool>> expression);
         Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> expression);
+        IQueryable<T> FindQueriable(Expression<Func<T, bool>> expression);
+        IQueryable<T> FindQueriable();
         T Replace(T user);
         Task<T> ReplaceAsync(T user);
     }

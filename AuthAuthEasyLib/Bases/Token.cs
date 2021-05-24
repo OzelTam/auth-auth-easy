@@ -1,4 +1,5 @@
-﻿using AuthAuthEasyLib.Common.Tokens;
+﻿
+using AuthAuthEasyLib.Tokens;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
 

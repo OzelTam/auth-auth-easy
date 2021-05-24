@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AuthAuthEasyLib.Common.Tokens
+namespace AuthAuthEasyLib.Tokens
 {
     [Serializable]
     public class VerificationToken : Bases.Token

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AuthAuthEasyLib.Common.Tokens
+namespace AuthAuthEasyLib.Tokens
 {
     [Serializable]
     public class AuthToken : Bases.Token
@@ -12,6 +12,6 @@ namespace AuthAuthEasyLib.Common.Tokens
             TokenCode = 1;
             Description = "Auth Token";
         }
-       
+
     }
 }

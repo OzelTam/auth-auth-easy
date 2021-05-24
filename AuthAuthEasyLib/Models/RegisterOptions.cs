@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AuthAuthEasyLib.Services
+namespace AuthAuthEasyLib
 {
     public class RegisterOptions
     {

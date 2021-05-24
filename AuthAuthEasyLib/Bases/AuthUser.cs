@@ -10,7 +10,7 @@ namespace AuthAuthEasyLib.Bases
     public class AuthUser : IAuthUser
     {
         [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
-        public string _Id { get ; set; }
+        public string _Id { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public string Email { get; set; }

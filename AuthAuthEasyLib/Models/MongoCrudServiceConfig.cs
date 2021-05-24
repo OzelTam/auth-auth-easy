@@ -1,7 +1,6 @@
 ﻿using MongoDB.Driver;
-using System.Security.Authentication;
 
-namespace AuthAuthEasyLib.Services
+namespace AuthAuthEasyLib
 {
     public class MongoCrudServiceConfig
     {
@@ -38,10 +37,10 @@ namespace AuthAuthEasyLib.Services
 
         internal SetMethod ConfigType { get; }
 
-        public MongoClientSettings MongoSettings { get;}
-        public string ConnectionString { get;}
-        public string DatabaseName { get ;}
-        public string CollectionName { get;}
+        public MongoClientSettings MongoSettings { get; }
+        public string ConnectionString { get; }
+        public string DatabaseName { get; }
+        public string CollectionName { get; }
 
 
     }

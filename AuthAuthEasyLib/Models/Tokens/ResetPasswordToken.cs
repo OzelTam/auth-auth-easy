@@ -1,9 +1,9 @@
 ﻿using AuthAuthEasyLib.Bases;
 using System;
 
-namespace AuthAuthEasyLib.Common.Tokens
+namespace AuthAuthEasyLib.Tokens
 {
-    public class ResetPasswordToken:Token
+    public class ResetPasswordToken : Token
     {
         public ResetPasswordToken(string key, TimeSpan span)
         {

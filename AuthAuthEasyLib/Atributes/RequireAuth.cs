@@ -3,9 +3,9 @@ using System;
 
 namespace AuthAuthEasyLib.Atributes
 {
-    // TODO: IMPLEMENT "RequireAuth" Attribute
+
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-    public class RequireAuthAttribute: ActionFilterAttribute
+    public class RequireAuthAttribute : ActionFilterAttribute
     {
 
         public RequireAuthAttribute()
@@ -18,7 +18,7 @@ namespace AuthAuthEasyLib.Atributes
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             base.OnActionExecuting(context);
-            
+
         }
     }
 }
