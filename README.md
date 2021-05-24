@@ -75,7 +75,9 @@ foreach (var token in user.Tokens.Where(t => t.TokenCode == 1)) // TokenCode 1 f
 
 #### IsAuthorized
 ```C#
-var (isAuthorized, Except) = authService.IsAuthorized("AUTH TOKEN KEY"); // Require role overload will be implemented soon.
+var (isAuthorized, Except, User) = authService.IsAuthorized("AUTH TOKEN KEY"); 
+// or 
+var (isAuthorized, Except, User) = authService.IsAuthorized("AUTH TOKEN KEY","admin",true); // Requires admin role case insensitive
 if(isAuthorized)
 {
   // User Is Authorized
