@@ -1,4 +1,5 @@
-﻿using AuthAuthEasyLib.Interfaces;
+﻿using AuthAuthEasyLib.Bases;
+using AuthAuthEasyLib.Interfaces;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -99,35 +100,43 @@ namespace AuthAuthEasyLib.Services
 
         public bool CheckAuth(string authTokenKey)
         {
-            return crudService.FindQueriable()
-                 .Any(u =>
-                 u.Tokens.Any(t =>
-                 t.Key == authTokenKey &&
-                 t.TokenCode == 1 &&
-                 DateTime.Compare(t.Expiration, DateTime.Now) < 0));
+            try
+            {
+
+                var uid = TokenManager.GetUserIdWithTokenKey(authTokenKey, 1); // Find User Id
+                TokenManager.ClearExpiredTokens(uid); //Clear expired Tokens
+                uid = TokenManager.GetUserIdWithTokenKey(authTokenKey, 1); // Find User Id Again (if token expired throws error) 
+                var isExists = crudService.FindQueriable().Any(u => u._Id == uid);
+
+                return isExists;
+            }
+            catch
+            {
+                return false;
+            }
+
         }
-        public bool CheckAuth(string authTokenKey, string requiredRole, bool caseInsensetive = false)
+        public bool CheckAuth(string authTokenKey, string authorizedRole, bool caseInsensetive = false)
         {
-            return caseInsensetive ?
-                crudService.FindQueriable()
-                 .Any(u =>
-                 u.Tokens.Any(t =>
-                 t.Key == authTokenKey &&
-                 t.TokenCode == 1 &&
-                 DateTime.Compare(t.Expiration, DateTime.Now) < 0) &&
-                 u.Roles.Any(r => r.ToLower() == requiredRole.ToLower()))
-                 :
-                 crudService.FindQueriable()
-                 .Any(u =>
-                 u.Tokens.Any(t =>
-                 t.Key == authTokenKey &&
-                 t.TokenCode == 1 &&
-                 DateTime.Compare(t.Expiration, DateTime.Now) < 0) &&
-                 u.Roles.Any(r => r == requiredRole));
+            try
+            {
+
+                var uid = TokenManager.GetUserIdWithTokenKey(authTokenKey, 1); // Find User Id
+                TokenManager.ClearExpiredTokens(uid); //Clear expired Tokens
+                uid = TokenManager.GetUserIdWithTokenKey(authTokenKey, 1); // Find User Id Again (if token expired throws error) 
+                var roles = crudService.FindQueriable(u => u._Id == uid)
+                    .Select(u => u.Roles).FirstOrDefault();
+
+                return caseInsensetive ? roles.Any(r => r.ToLower() == authorizedRole.ToLower()) : roles.Any(r => r == authorizedRole);
+            }
+            catch
+            {
+                return false;
+            }
         }
-        public bool CheckAuth(string authTokenKey, string[] requiredRoles, bool caseInsensetive = false)
+        public bool CheckAuth(string authTokenKey, string[] authorizedRoles, bool caseInsensetive = false)
         {
-            foreach (var role in requiredRoles)
+            foreach (var role in authorizedRoles)
             {
                 if (CheckAuth(authTokenKey, role, caseInsensetive))
                     return true;

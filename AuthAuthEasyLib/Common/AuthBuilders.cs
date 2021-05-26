@@ -65,8 +65,8 @@ namespace AuthAuthEasyLib.Common
         public static Token GeneratePasswordResetToken(IAuthUser authUser, TimeSpan span)
         {
             string userRepresentation = String.IsNullOrWhiteSpace(authUser._Id)
-              ? RandomString(15, 60)
-             : authUser._Id;
+                       ? RandomString(15, 60)
+                       : authUser._Id;
             return new Tokens.ResetPasswordToken(GenerateKey(userRepresentation), span);
         }
 

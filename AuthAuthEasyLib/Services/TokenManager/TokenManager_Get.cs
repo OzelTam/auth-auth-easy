@@ -12,6 +12,10 @@ namespace AuthAuthEasyLib.Services
             var userId = tokenCode == -1
                 ? crudService.FindQueriable().Where(u => u.Tokens.Any(t => t.Key == tokenKey)).Select(u => u._Id).FirstOrDefault()
                 : crudService.FindQueriable().Where(u => u.Tokens.Any(t => t.Key == tokenKey)).Select(u => u._Id).FirstOrDefault();
+
+            if (userId == null)
+                throw new KeyNotFoundException("User not found.");
+
             return userId;
         }
         public Task<string> GetUserIdWithTokenKeyAsync(string tokenKey, int tokenCode = -1)
