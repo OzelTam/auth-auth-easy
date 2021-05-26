@@ -1,4 +1,5 @@
 ﻿using AuthAuthEasyLib.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace AuthAuthEasyLib.Services
                 : crudService.FindQueriable().Where(u => u.Tokens.Any(t => t.Key == tokenKey)).Select(u => u._Id).FirstOrDefault();
 
             if (userId == null)
-                throw new KeyNotFoundException("User not found.");
+                throw new UnauthorizedAccessException("Invalid token key.");
 
             return userId;
         }
@@ -28,14 +29,14 @@ namespace AuthAuthEasyLib.Services
                 ? (await crudService.FindAsync(u => u.Tokens.Any(t => t.Key == tokenKey))).FirstOrDefault()
                 : (await crudService.FindAsync(u => u.Tokens.Any(t => t.Key == tokenKey && t.TokenCode == tokenCode))).FirstOrDefault();
 
-            return user == null ? throw new KeyNotFoundException("Token not found.") : user;
+            return user == null ? throw new UnauthorizedAccessException("Invalid token key.") : user;
         }
         public T GetUserWithTokenKey(string tokenKey, int tokenCode = -1)
         {
             T user = tokenCode == -1
                 ? crudService.Find(u => u.Tokens.Any(t => t.Key == tokenKey)).FirstOrDefault()
                 : crudService.Find(u => u.Tokens.Any(t => t.Key == tokenKey && t.TokenCode == tokenCode)).FirstOrDefault();
-            return user == null ? throw new KeyNotFoundException("Token not found.") : user;
+            return user == null ? throw new UnauthorizedAccessException("Invalid token key.") : user;
         }
     }
 }

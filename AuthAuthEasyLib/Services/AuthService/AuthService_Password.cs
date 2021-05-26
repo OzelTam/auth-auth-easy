@@ -17,7 +17,7 @@ namespace AuthAuthEasyLib.Services
             if (user == null)
                 throw new KeyNotFoundException("User not found.");
 
-            var token = AuthBuilders.GeneratePasswordResetToken(user, span);
+            var token = TokenBuilder.GeneratePasswordResetToken(user, span);
             await TokenManager.AddTokenAsync(user, token);
 
             return token;
@@ -28,7 +28,7 @@ namespace AuthAuthEasyLib.Services
             if (user == null)
                 throw new KeyNotFoundException("User not found.");
 
-            var token = AuthBuilders.GeneratePasswordResetToken(user, span);
+            var token = TokenBuilder.GeneratePasswordResetToken(user, span);
             TokenManager.AddToken(user, token);
 
             return token;

@@ -23,7 +23,7 @@ namespace AuthAuthEasyLib.Services
             }
             else if (BCrypt.Net.BCrypt.Verify(password, userFound.Password, true))
             {
-                var authToken = Common.AuthBuilders.GenerateAuthToken(userFound, lifeTimespan);
+                var authToken = Common.TokenBuilder.GenerateAuthToken(userFound, lifeTimespan);
                 await TokenManager.ClearExpiredTokensAsync(userFound._Id);
                 await TokenManager.AddTokenAsync(userFound, authToken);
                 return (userFound, authToken);
@@ -46,7 +46,7 @@ namespace AuthAuthEasyLib.Services
             }
             else if (BCrypt.Net.BCrypt.Verify(password, userFound.Password, true))
             {
-                var authToken = Common.AuthBuilders.GenerateAuthToken(userFound, lifeTimespan);
+                var authToken = Common.TokenBuilder.GenerateAuthToken(userFound, lifeTimespan);
                 TokenManager.ClearExpiredTokens(userFound._Id);
                 TokenManager.AddToken(userFound, authToken);
                 return (userFound, authToken);
@@ -57,25 +57,5 @@ namespace AuthAuthEasyLib.Services
             }
         }
 
-
-
-        #region Login With
-        public async Task<(T, Token)> LoginWithEmailAsync(string email, string password)
-        {
-            return await LoginAsync(u => u.Email == email, password);
-        }
-        public (T, Token) LoginWithEmail(string email, string password)
-        {
-            return Login(u => u.Email == email, password);
-        }
-        public async Task<(T, Token)> LoginWithUsernameAsync(string username, string password)
-        {
-            return await LoginAsync(u => u.Username == username, password);
-        }
-        public (T, Token) LoginWithUsername(string username, string password)
-        {
-            return Login(u => u.Username == username, password);
-        }
-        #endregion
     }
 }

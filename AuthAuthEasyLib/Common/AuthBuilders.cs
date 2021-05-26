@@ -2,15 +2,15 @@
 using AuthAuthEasyLib.Interfaces;
 using AuthAuthEasyLib.Services;
 using System;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace AuthAuthEasyLib.Common
 {
-    internal static class AuthBuilders
+    internal static class TokenBuilder
     {
-
 
         private static Random random = new Random();
         private static string ComputeMD5(string input)
@@ -68,63 +68,6 @@ namespace AuthAuthEasyLib.Common
                        ? RandomString(15, 60)
                        : authUser._Id;
             return new Tokens.ResetPasswordToken(GenerateKey(userRepresentation), span);
-        }
-
-        public static async Task<bool> ValidateNewUserAsync<T>(T newUser, ICrudService<T> crudService, RegisterOptions options) where T : IAuthUser
-        {
-
-            var relatedUsers = (await crudService.FindAsync(u =>
-                               u.Email == newUser.Email ||
-                               u.PhoneNumber == newUser.PhoneNumber ||
-                               u.Username == newUser.Username)).ToList();
-
-            if (relatedUsers.Count() == 0) { return true; } // If No Similar Users Found
-
-
-            if (options.RequireUniqueEmails && relatedUsers.Count(usr => usr.Email == newUser.Email) > 0)
-            {
-                throw new InvalidOperationException("Email already in use");
-            }
-
-            if (options.RequireUniqueUsernames && relatedUsers.Count(usr => usr.Username == newUser.Username) > 0)
-            {
-                throw new InvalidOperationException("Username is taken");
-            }
-
-            if (options.RequireUniquePhoneNumbers && relatedUsers.Count(usr => usr.PhoneNumber == newUser.PhoneNumber) > 0)
-            {
-                throw new InvalidOperationException("Phone number is already in use");
-            }
-
-            return true;
-        }
-        public static bool ValidateNewUser<T>(T newUser, ICrudService<T> crudService, RegisterOptions options) where T : IAuthUser
-        {
-
-            var relatedUsers = crudService.Find(u =>
-                               u.Email == newUser.Email ||
-                               u.PhoneNumber == newUser.PhoneNumber ||
-                               u.Username == newUser.Username).ToList();
-
-            if (relatedUsers.Count() == 0) { return true; } // If No Similar Users Found
-
-
-            if (options.RequireUniqueEmails && relatedUsers.Count(usr => usr.Email == newUser.Email) > 0)
-            {
-                throw new InvalidOperationException("Email already in use");
-            }
-
-            if (options.RequireUniqueUsernames && relatedUsers.Count(usr => usr.Username == newUser.Username) > 0)
-            {
-                throw new InvalidOperationException("Username is taken");
-            }
-
-            if (options.RequireUniquePhoneNumbers && relatedUsers.Count(usr => usr.PhoneNumber == newUser.PhoneNumber) > 0)
-            {
-                throw new InvalidOperationException("Phone number is already in use");
-            }
-
-            return true;
         }
 
     }

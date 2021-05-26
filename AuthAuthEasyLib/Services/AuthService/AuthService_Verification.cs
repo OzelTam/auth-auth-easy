@@ -66,7 +66,7 @@ namespace AuthAuthEasyLib.Services
             var userVToken = user.Tokens.Where(t => t.TokenCode == 2).FirstOrDefault();
             if (userVToken == null)
             {
-                userVToken = Common.AuthBuilders.GenerateVerificationToken(user, tokenSpan);
+                userVToken = Common.TokenBuilder.GenerateVerificationToken(user, tokenSpan);
                 await TokenManager.AddTokenAsync(user, userVToken);
             }
 
@@ -85,7 +85,7 @@ namespace AuthAuthEasyLib.Services
             var userVToken = user.Tokens.Where(t => t.TokenCode == 2).FirstOrDefault();
             if (userVToken == null)
             {
-                userVToken = Common.AuthBuilders.GenerateVerificationToken(user, tokenSpan);
+                userVToken = Common.TokenBuilder.GenerateVerificationToken(user, tokenSpan);
                 TokenManager.AddToken(user, userVToken);
             }
 

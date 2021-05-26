@@ -31,10 +31,22 @@ namespace AuthAuthEasyLib.Services
                     mongoClient = new MongoClient();
                     break;
             }
-
-
             database = mongoClient.GetDatabase(config.DatabaseName);
             collection = database.GetCollection<T>(config.CollectionName);
+
+            var uniqueProps = typeof(T).GetProperties()
+                .Where(prop => Attribute.IsDefined(prop, typeof(Attributes.UniqueAttribute)));
+
+            foreach (var uniqueProp in uniqueProps)
+            {
+                Task.Run(async () =>
+                {
+                    var options = new CreateIndexOptions() { Unique = true };
+                    var field = new StringFieldDefinition<T>(uniqueProp.Name);
+                    var indexDefinition = new IndexKeysDefinitionBuilder<T>().Ascending(field);
+                    await collection.Indexes.CreateOneAsync(indexDefinition, options);
+                });
+            }
 
         }
 

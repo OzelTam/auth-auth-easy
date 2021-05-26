@@ -1,6 +1,7 @@
 ﻿using AuthAuthEasyLib.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,11 +15,11 @@ namespace AuthAuthEasyLib.Services
                 throw new KeyNotFoundException("User not found");
 
             if (QueryUsers(u => u._Id == userId).Any(u => u.Roles.Any(r => r == role)))
-                throw new InvalidOperationException("Role already assigned");
+                throw new DuplicateNameException("Role already assigned");
 
             if (caseInsensitive)
                 if (QueryUsers(u => u._Id == userId).Any(u => u.Roles.Any(r => r.ToLower() == role.ToLower())))
-                    throw new InvalidOperationException("Role already assigned");
+                    throw new DuplicateNameException("Role already assigned");
 
             UpdateUser(userId, (u) => u.Roles.Add(role));
         }
@@ -36,11 +37,11 @@ namespace AuthAuthEasyLib.Services
                 throw new KeyNotFoundException("User not found");
 
             if (users.Where(u => u._Id == userId).Any(u => u.Roles.Any(r => r == role)))
-                throw new InvalidOperationException("Role already assigned");
+                throw new DuplicateNameException("Role already assigned");
 
             if (caseInsensitive)
                 if (users.Where(u => u._Id == userId).Any(u => u.Roles.Any(r => r.ToLower() == role.ToLower())))
-                    throw new InvalidOperationException("Role already assigned");
+                    throw new DuplicateNameException("Role already assigned");
 
             await UpdateUserAsync(userId, (u) => u.Roles.Add(role));
         }
