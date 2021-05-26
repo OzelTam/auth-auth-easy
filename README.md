@@ -1,7 +1,8 @@
 # Auth Auth Easy
 .NET Standart library that handles Authorization/Authentication methods by using NoSQL (MongoDB) database.
 
-# Usage
+# Usage 
+### [OUTDATED] -New documentation coming soon.
 #### Creating User Model
 ```C#
 using AuthAuthEasyLib.Bases;
