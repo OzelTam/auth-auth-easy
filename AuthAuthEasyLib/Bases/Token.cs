@@ -2,7 +2,7 @@
 using AuthAuthEasyLib.Tokens;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
-
+using System.ComponentModel.DataAnnotations;
 
 namespace AuthAuthEasyLib.Bases
 {
@@ -16,6 +16,7 @@ namespace AuthAuthEasyLib.Bases
     [BsonKnownTypes(typeof(AuthToken), typeof(VerificationToken), typeof(ResetPasswordToken))]
     public class Token
     {
+        [Key]
         public string Key { get; set; }
         public DateTime Expiration { get; set; }
         /// <summary>

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace AuthAuthEasyLib.Services
 {
-    public partial class TokenManager<T> where T : IAuthUser
+    public partial class TokenManager<T> where T : class, IAuthUser
     {
         public async Task ClearExpiredTokensAsync(string userId)
         {

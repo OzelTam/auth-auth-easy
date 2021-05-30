@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AuthAuthEasyLib.Services
 {
-    public partial class AuthService<T> where T : IAuthUser
+    public partial class AuthService<T>
     {
         public async Task<(T, Token)> LoginAsync(Expression<Func<T, bool>> expression, string password)
         {

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AuthAuthEasyLib.Services
 {
-    public partial class AuthService<T> where T : IAuthUser
+    public partial class AuthService<T> 
     {
         public void AddRole(string userId, string role, bool caseInsensitive = false)
         {

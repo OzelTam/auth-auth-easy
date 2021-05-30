@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AuthAuthEasyLib.Services
 {
-    public partial class AuthService<T> where T : IAuthUser
+    public partial class AuthService<T>
     {
 
         public async Task<(bool, Exception, T)> GetAuthorityAsync(string authTokenKey)

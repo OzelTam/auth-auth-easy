@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AuthAuthEasyLib.Services
 {
-    public partial class AuthService<T> where T : IAuthUser
+    public partial class AuthService<T>
     {
         public async Task<Token> AddPaswordResetRequestAsync(Expression<Func<T, bool>> getUserExpression, TimeSpan span)
         {

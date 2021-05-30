@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace AuthAuthEasyLib.Services
 {
-    public partial class AuthService<T> where T : IAuthUser
+    public partial class AuthService<T> where T:class,IAuthUser
     {
-
         public async Task UpdateUserAsync(string userId, Action<T> updateMethod)
         {
             var user = await GetUserByIdAsync(userId);
