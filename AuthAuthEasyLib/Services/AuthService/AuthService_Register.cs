@@ -10,27 +10,8 @@ namespace AuthAuthEasyLib.Services
     public partial class AuthService<T>
     {
 
-        /// <summary>
-        /// Registers new user with the default verification token span of 7 days.
-        /// </summary>
-        /// <param name="newUser"></param>
-        /// <returns></returns>
-        public async Task RegisterAsync(T newUser)
-        {
-            await RegisterAsync(newUser, new TimeSpan(7, 0, 0, 0));
-        }
 
-        /// <summary>
-        /// Registers new user with the default verification token span of 7 days.
-        /// </summary>
-        /// <param name="newUser"></param>
-        /// <returns></returns>
-        public void Register(T newUser)
-        {
-            Register(newUser, new TimeSpan(7, 0, 0, 0));
-        }
-
-        public async Task RegisterAsync(T newUser, TimeSpan verificationTokenSpan)
+        public async Task RegisterAsync(T newUser, TimeSpan? verificationTokenSpan = null)
         {
 
 
@@ -54,13 +35,13 @@ namespace AuthAuthEasyLib.Services
             }
 
             newUser.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(newUser.Password);
-            var VerificationToken = TokenBuilder.GenerateVerificationToken(newUser, verificationTokenSpan); // Creates Verifcation Token
+            var VerificationToken = TokenBuilder.GenerateVerificationToken(newUser, verificationTokenSpan ?? TimeSpan.FromDays(7)); // Creates Verifcation Token
             newUser.Tokens.Add(VerificationToken); // Add Token to Users Tokens
 
             await crudService.AddAsync(newUser);
 
         }
-        public void Register(T newUser, TimeSpan verificationTokenSpan)
+        public void Register(T newUser, TimeSpan? verificationTokenSpan = null)
         {
             if (crudType == CrudType.Sql)
             {
@@ -82,7 +63,7 @@ namespace AuthAuthEasyLib.Services
             }
 
             newUser.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(newUser.Password);
-            var VerificationToken = TokenBuilder.GenerateVerificationToken(newUser, verificationTokenSpan); // Creates Verifcation Token
+            var VerificationToken = TokenBuilder.GenerateVerificationToken(newUser, verificationTokenSpan ?? TimeSpan.FromDays(7)); // Creates Verifcation Token
             newUser.Tokens.Add(VerificationToken); // Add Token to Users Tokens
 
             crudService.Add(newUser);

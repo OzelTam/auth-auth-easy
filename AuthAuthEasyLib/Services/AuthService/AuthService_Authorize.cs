@@ -1,6 +1,8 @@
 ﻿using AuthAuthEasyLib.Bases;
 using AuthAuthEasyLib.Interfaces;
+using AuthAuthEasyLib.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,11 +18,15 @@ namespace AuthAuthEasyLib.Services
             if (userToken == null)
                 return (false, new UnauthorizedAccessException("Invalid token key."), user);
 
-            if (DateTime.Compare(userToken.Expiration, DateTime.Now) < 0)
+            if(userToken.Expiration != null)
             {
-                await TokenManager.ClearExpiredTokensAsync(user._Id);
-                return (false, new UnauthorizedAccessException("Token has been expired."), user);
+                if (DateTime.Compare(userToken.Expiration.Value, DateTime.Now) < 0)
+                {
+                    await TokenManager.ClearExpiredTokensAsync(user._Id);
+                    return (false, new UnauthorizedAccessException("Token has been expired."), user);
+                }
             }
+            
 
             return (true, null, user);
 
@@ -39,7 +45,7 @@ namespace AuthAuthEasyLib.Services
             }
 
         }
-        public async Task<(bool, Exception, T)> GetAuthorityAsync(string authTokenKey, string[] requiredRoles, bool caseInsensetive = false)
+        public async Task<(bool, Exception, T)> GetAuthorityAsync(string authTokenKey, string[] requiredRoles,bool caseInsensetive = false)
         {
             var (isValid, except, user) = await GetAuthorityAsync(authTokenKey);
             if (!isValid)
@@ -54,6 +60,8 @@ namespace AuthAuthEasyLib.Services
 
         }
 
+
+
         public (bool, Exception, T) GetAuthority(string authTokenKey)
         {
             var user = TokenManager.GetUserWithTokenKey(authTokenKey, 1);
@@ -62,11 +70,15 @@ namespace AuthAuthEasyLib.Services
             if (userToken == null)
                 return (false, new UnauthorizedAccessException("Invalid token key."), user);
 
-            if (DateTime.Compare(userToken.Expiration, DateTime.Now) < 0)
+            if(userToken.Expiration != null)
             {
-                TokenManager.ClearExpiredTokens(user._Id);
-                return (false, new UnauthorizedAccessException("Token has been expired."), user);
+                if (DateTime.Compare(userToken.Expiration.Value, DateTime.Now) < 0)
+                {
+                    TokenManager.ClearExpiredTokens(user._Id);
+                    return (false, new UnauthorizedAccessException("Token has been expired."), user);
+                }
             }
+            
 
             return (true, null, user);
 
@@ -98,15 +110,36 @@ namespace AuthAuthEasyLib.Services
             }
         }
 
-        public bool CheckAuth(string authTokenKey)
+
+
+
+        private async Task RefreshSessionToken(string authTokenKey, TimeSpan resetExpiration )
         {
+                var freshToken = await TokenManager.RefreshTokenAsync(authTokenKey, resetExpiration);
+                await UpdateSessionCache(authTokenKey, token =>
+                {
+                    token.AbsoluteExpiration = freshToken.Expiration;
+                });
+        }
+
+
+
+        public async Task<bool> CheckAuth(string authTokenKey, TimeSpan? resetExpiration = null)
+        {
+            var session = GetSessionCache(authTokenKey).Result;
+            if (session != null)
+                return true;
+
             try
             {
 
                 var uid = TokenManager.GetUserIdWithTokenKey(authTokenKey, 1); // Find User Id
                 TokenManager.ClearExpiredTokens(uid); //Clear expired Tokens
                 uid = TokenManager.GetUserIdWithTokenKey(authTokenKey, 1); // Find User Id Again (if token expired throws error) 
-                var isExists = crudService.FindQueriable().Any(u => u._Id == uid);
+                var isExists = crudService.FindQueriable().Any(u => u._Id == uid);  // Check if exists
+
+                if (isExists && resetExpiration.HasValue)                           
+                    await RefreshSessionToken(authTokenKey, resetExpiration.Value); //Refresh If Exists
 
                 return isExists;
             }
@@ -116,52 +149,90 @@ namespace AuthAuthEasyLib.Services
             }
 
         }
-        public bool CheckAuth(string authTokenKey, string authorizedRole, bool caseInsensetive = false)
+        public async Task<bool> CheckAuth(string authTokenKey, string authorizedRole, bool caseInsensetive = false, TimeSpan? resetExpiration = null)
         {
+           var session = GetSessionCache(authTokenKey).Result;
+           if (session != null && CheckRole(session?.Roles, authorizedRole))
+               return true;
+
+
             try
             {
-
                 var uid = TokenManager.GetUserIdWithTokenKey(authTokenKey, 1); // Find User Id
                 TokenManager.ClearExpiredTokens(uid); //Clear expired Tokens
                 uid = TokenManager.GetUserIdWithTokenKey(authTokenKey, 1); // Find User Id Again (if token expired throws error) 
                 var roles = crudService.FindQueriable(u => u._Id == uid)
                     .Select(u => u.Roles).FirstOrDefault();
 
-                return caseInsensetive ? roles.Any(r => r.ToLower() == authorizedRole.ToLower()) : roles.Any(r => r == authorizedRole);
+
+                var isExists = caseInsensetive 
+                    ? roles.Any(r => r.RoleName.ToLower() == authorizedRole.ToLower()) 
+                    : roles.Any(r => r.RoleName == authorizedRole);
+               
+
+                    if(isExists && resetExpiration.HasValue)
+                    await RefreshSessionToken(authTokenKey, resetExpiration.Value); //Refresh If Exists
+
+                return isExists;
             }
             catch
             {
                 return false;
             }
         }
-        public bool CheckAuth(string authTokenKey, string[] authorizedRoles, bool caseInsensetive = false)
+        public async Task<bool> CheckAuth(string authTokenKey, string[] authorizedRoles,bool caseInsensetive = false, TimeSpan? resetExpiration = null)
         {
+            var session = GetSessionCache(authTokenKey).Result;
+            if (session != null && CheckRole(session?.Roles, authorizedRoles))
+                return true;
+
             foreach (var role in authorizedRoles)
             {
-                if (CheckAuth(authTokenKey, role, caseInsensetive))
+                if (await CheckAuth(authTokenKey, role, caseInsensetive, resetExpiration))
                     return true;
             }
 
             return false;
         }
+
+
+
 
         #region CheckRole
         private bool CheckRole(T user, string role, bool caseInsensetive = false)
         {
             if (!caseInsensetive)
-                return user.Roles.Any(rol => rol == role);
+                return RemoveExpiredUserRoles(user).Roles.Any(rol => rol.RoleName == role);
             else
-                return user.Roles.Any(rol => rol.ToLower() == role.ToLower());
+                return RemoveExpiredUserRoles(user).Roles.Any(rol => rol.RoleName.ToLower() == role.ToLower());
         }
         private bool CheckRole(T user, string[] roles, bool caseInsensetive = false)
         {
             foreach (var role in roles)
             {
+
                 if (CheckRole(user, role, caseInsensetive))
                     return true;
             }
             return false;
         }
+        private bool CheckRole(IEnumerable<Role> roleList,string role, bool caseInsensitive = false)
+        {
+            roleList = ClearExpiredRoles(roleList.ToList());
+            return caseInsensitive
+                ? roleList.Any(r => r.RoleName.ToLower() == role.ToLower())
+                : roleList.Any(r => r.RoleName == role);
+        }
+        private bool CheckRole(IEnumerable<Role> roleList, string[] roles, bool caseInsensitive = false)
+        {
+            foreach (var role in roles)
+            {
+                if (CheckRole(roleList, role))
+                    return true;
+            }
+            return false;
+        }
+
         #endregion
     }
 }

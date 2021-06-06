@@ -1,5 +1,6 @@
 ﻿using AuthAuthEasyLib.Attributes;
 using AuthAuthEasyLib.Interfaces;
+using AuthAuthEasyLib.Models;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
 using System;
@@ -18,6 +19,6 @@ namespace AuthAuthEasyLib.Bases
         public string Password { get; set; }
         public bool IsVerified { get; set; }
         public List<Token> Tokens { get; set; } = new List<Token>();
-        public List<string> Roles { get; set; } = new List<string> { "user" };
+        public List<Role> Roles { get; set; } = new List<Role>() { new Role("user",null)};
     }
 }

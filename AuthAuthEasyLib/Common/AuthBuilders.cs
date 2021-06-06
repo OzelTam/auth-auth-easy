@@ -45,7 +45,8 @@ namespace AuthAuthEasyLib.Common
             return Convert.ToBase64String(randomString.Concat(time).Concat(uId).ToArray());
         }
 
-        public static Token GenerateAuthToken(IAuthUser authUser, TimeSpan span)
+
+        public static Token GenerateAuthToken(IAuthUser authUser, TimeSpan? span = null)
         {
             string userRepresentation = String.IsNullOrWhiteSpace(authUser._Id)
                 ? RandomString(15, 60)
@@ -54,7 +55,7 @@ namespace AuthAuthEasyLib.Common
             return new Tokens.AuthToken(GenerateKey(userRepresentation), span);
         }
 
-        public static Token GenerateVerificationToken(IAuthUser authUser, TimeSpan span)
+        public static Token GenerateVerificationToken(IAuthUser authUser, TimeSpan? span = null)
         {
             string userRepresentation = String.IsNullOrWhiteSpace(authUser._Id)
              ? RandomString(15, 60)
@@ -62,7 +63,7 @@ namespace AuthAuthEasyLib.Common
             return new Tokens.VerificationToken(ComputeMD5(GenerateKey(userRepresentation)), span);
         }
 
-        public static Token GeneratePasswordResetToken(IAuthUser authUser, TimeSpan span)
+        public static Token GeneratePasswordResetToken(IAuthUser authUser, TimeSpan? span = null)
         {
             string userRepresentation = String.IsNullOrWhiteSpace(authUser._Id)
                        ? RandomString(15, 60)

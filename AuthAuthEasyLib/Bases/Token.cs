@@ -18,7 +18,7 @@ namespace AuthAuthEasyLib.Bases
     {
         [Key]
         public string Key { get; set; }
-        public DateTime Expiration { get; set; }
+        public DateTime? Expiration { get; set; }
         /// <summary>
         /// Known <see cref="Token"/> Codes: <br/> <list type="bullet">
         /// <item> 1 = <see cref="AuthToken"/></item>

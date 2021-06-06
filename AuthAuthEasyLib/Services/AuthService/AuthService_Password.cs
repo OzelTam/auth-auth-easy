@@ -11,24 +11,26 @@ namespace AuthAuthEasyLib.Services
 {
     public partial class AuthService<T>
     {
-        public async Task<Token> AddPaswordResetRequestAsync(Expression<Func<T, bool>> getUserExpression, TimeSpan span)
+        public async Task<Token> AddPaswordResetRequestAsync(Expression<Func<T, bool>> getUserExpression, TimeSpan? span = null)
         {
             var user = (await crudService.FindAsync(getUserExpression)).FirstOrDefault();
             if (user == null)
                 throw new KeyNotFoundException("User not found.");
 
-            var token = TokenBuilder.GeneratePasswordResetToken(user, span);
+            var token = TokenBuilder.GeneratePasswordResetToken(user, span ?? TimeSpan.FromDays(7));
             await TokenManager.AddTokenAsync(user, token);
 
             return token;
         }
-        public Token AddPaswordResetRequest(Expression<Func<T, bool>> getUserExpression, TimeSpan span)
+        public Token AddPaswordResetRequest(Expression<Func<T, bool>> getUserExpression, TimeSpan? span = null)
         {
             var user = crudService.Find(getUserExpression).FirstOrDefault();
             if (user == null)
                 throw new KeyNotFoundException("User not found.");
 
-            var token = TokenBuilder.GeneratePasswordResetToken(user, span);
+
+
+            var token = TokenBuilder.GeneratePasswordResetToken(user, span ?? TimeSpan.FromDays(7));
             TokenManager.AddToken(user, token);
 
             return token;

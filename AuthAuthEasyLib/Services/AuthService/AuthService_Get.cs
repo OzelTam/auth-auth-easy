@@ -11,13 +11,13 @@ namespace AuthAuthEasyLib.Services
     {
         public async Task<T> GetUserByIdAsync(string userId)
         {
-            var res = (await crudService.FindAsync(usr => usr._Id == userId)).FirstOrDefault();
-            return res == null ? throw new KeyNotFoundException("User not found.") : res;
+            var res = RemoveExpiredUserRoles((await crudService.FindAsync(usr => usr._Id == userId)).FirstOrDefault());
+            return res ?? throw new KeyNotFoundException("User not found.");
         }
         public T GetUserById(string userId)
         {
-            var res = crudService.Find(usr => usr._Id == userId).FirstOrDefault();
-            return res == null ? throw new KeyNotFoundException("User not found.") : res;
+            var res = RemoveExpiredUserRoles(crudService.Find(usr => usr._Id == userId).FirstOrDefault());
+            return res ?? throw new KeyNotFoundException("User not found.");
         }
         public IEnumerable<T> FindUser(Expression<Func<T, bool>> expression)
         {

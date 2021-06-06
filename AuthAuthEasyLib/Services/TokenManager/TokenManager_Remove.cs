@@ -13,7 +13,12 @@ namespace AuthAuthEasyLib.Services
                 .FirstOrDefault();
             var ExpiredTokens = foundUser.Tokens
                 .RemoveAll(token =>
-                DateTime.Compare(token.Expiration, DateTime.Now) <= 0);
+                {
+                    if (token.Expiration == null)
+                        return false;
+                    return DateTime.Compare(token.Expiration.Value, DateTime.Now) <= 0;
+                }
+               );
 
             await crudService.ReplaceAsync(foundUser);
         }
@@ -23,8 +28,11 @@ namespace AuthAuthEasyLib.Services
             var foundUser = (crudService.Find(z => z._Id == userId))
                 .FirstOrDefault();
             var ExpiredTokens = foundUser.Tokens
-                .RemoveAll(token =>
-                DateTime.Compare(token.Expiration, DateTime.Now) <= 0);
+                .RemoveAll(token => {
+                    if (token.Expiration == null)
+                        return false;
+                    return DateTime.Compare(token.Expiration.Value, DateTime.Now) <= 0;
+                });
 
             crudService.Replace(foundUser);
         }

@@ -1,4 +1,5 @@
 ﻿using AuthAuthEasyLib.Bases;
+using AuthAuthEasyLib.Models;
 using System;
 using System.Collections.Generic;
 
@@ -10,7 +11,7 @@ namespace AuthAuthEasyLib.Interfaces
         string Password { get; set; }
         bool IsVerified { get; set; }
         List<Token> Tokens { get; set; }
-        List<String> Roles { get; set; }
+        List<Role> Roles { get; set; }
 
     }
 }

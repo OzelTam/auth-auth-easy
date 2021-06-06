@@ -19,15 +19,15 @@ namespace AuthAuthEasyLib.Services
 
             if (verificationToken == null)
                 throw new InvalidOperationException("Invalid verification key.");
-            else if (DateTime.Compare(verificationToken.Expiration, DateTime.Now) < 0)
-            {
-                throw new UnauthorizedAccessException("Verification token is expired");
-            }
-            else
+            else if (verificationToken.Expiration == null || DateTime.Compare(verificationToken.Expiration.Value, DateTime.Now) > 0)
             {
                 user.Tokens.Remove(verificationToken);
                 user.IsVerified = true;
                 await crudService.ReplaceAsync(user);
+            }
+            else
+            {
+                throw new UnauthorizedAccessException("Verification token is expired");
             }
 
         }
@@ -41,15 +41,15 @@ namespace AuthAuthEasyLib.Services
 
             if (verificationToken == null)
                 throw new InvalidOperationException("Invalid verification key.");
-            else if (DateTime.Compare(verificationToken.Expiration, DateTime.Now) < 0)
-            {
-                throw new UnauthorizedAccessException("Verification token is expired");
-            }
-            else
+            else if (verificationToken.Expiration == null || DateTime.Compare(verificationToken.Expiration.Value, DateTime.Now) > 0)
             {
                 user.Tokens.Remove(verificationToken);
                 user.IsVerified = true;
                 crudService.Replace(user);
+            }
+            else
+            {
+                throw new UnauthorizedAccessException("Verification token is expired");
             }
 
         }

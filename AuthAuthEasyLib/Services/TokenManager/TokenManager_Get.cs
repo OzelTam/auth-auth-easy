@@ -10,6 +10,25 @@ namespace AuthAuthEasyLib.Services
     {
         public string GetUserIdWithTokenKey(string tokenKey, int tokenCode = -1)
         {
+            
+            if (authService.cache != null) // Check Cache
+            {
+                var session = authService.GetSessionCache(tokenKey).Result;
+                if(session != null)
+                {
+                    string uid;
+
+                    if (tokenCode < 0)
+                        uid = session.UserId;
+                    else
+                        uid = session.Token.TokenCode == tokenCode 
+                            ?session.UserId
+                            : null;
+
+                    if (!String.IsNullOrEmpty(uid))
+                        return uid;
+                }
+            } 
             var userId = tokenCode == -1
                 ? crudService.FindQueriable().Where(u => u.Tokens.Any(t => t.Key == tokenKey)).Select(u => u._Id).FirstOrDefault()
                 : crudService.FindQueriable().Where(u => u.Tokens.Any(t => t.Key == tokenKey)).Select(u => u._Id).FirstOrDefault();
@@ -25,18 +44,15 @@ namespace AuthAuthEasyLib.Services
         }
         public async Task<T> GetUserWithTokenKeyAsync(string tokenKey, int tokenCode = -1)
         {
-            T user = tokenCode <= -1
-                ? (await crudService.FindAsync(u => u.Tokens.Any(t => t.Key == tokenKey))).FirstOrDefault()
-                : (await crudService.FindAsync(u => u.Tokens.Any(t => t.Key == tokenKey && t.TokenCode == tokenCode))).FirstOrDefault();
-
-            return user == null ? throw new UnauthorizedAccessException("Invalid token key.") : user;
+            var uid = await GetUserIdWithTokenKeyAsync(tokenKey, tokenCode);
+            T user = (await crudService.FindAsync(u => u._Id == uid)).FirstOrDefault();
+            return user ?? throw new UnauthorizedAccessException("Invalid token key.") ;
         }
         public T GetUserWithTokenKey(string tokenKey, int tokenCode = -1)
         {
-            T user = tokenCode == -1
-                ? crudService.Find(u => u.Tokens.Any(t => t.Key == tokenKey)).FirstOrDefault()
-                : crudService.Find(u => u.Tokens.Any(t => t.Key == tokenKey && t.TokenCode == tokenCode)).FirstOrDefault();
-            return user == null ? throw new UnauthorizedAccessException("Invalid token key.") : user;
+            var uid =  GetUserIdWithTokenKey(tokenKey, tokenCode);
+            T user = crudService.Find(u => u._Id == uid).FirstOrDefault();
+            return user ?? throw new UnauthorizedAccessException("Invalid token key.") ;
         }
     }
 }
