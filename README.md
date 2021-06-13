@@ -1,5 +1,5 @@
 # Auth Auth Easy
-.NET Standart library that handles Authorization/Authentication methods by using NoSQL (MongoDB) database.
+.NET Standart library that handles Authorization/Authentication methods by using NoSQL (MongoDB), SQL (MSSQL) database. It also can use Redis as cache.
 
 # Usage 
 ### [OUTDATED] -New documentation coming soon.
